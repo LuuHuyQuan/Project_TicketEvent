@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,12 @@ using System.Threading.Tasks;
 
 namespace Repositories.Interfaces
 {
-    internal interface ISuKienRepository
+    public interface ISuKienRepository
     {
+        Task<IEnumerable<SuKien>> GetAllAsync();
+        Task<SuKien?> GetByIdAsync(int id);
+        Task<int> CreateAsync(SuKien suKien);
+        Task<bool> UpdateAsync(SuKien suKien);
+        Task<bool> DeleteAsync(int id);
     }
 }
