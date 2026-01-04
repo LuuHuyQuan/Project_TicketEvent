@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Services.Interfaces
+namespace Repositories.Interfaces
 {
-    internal class Class1
+    internal class IRefreshTokenRepository
     {
     }
 }
