@@ -6,7 +6,13 @@ using System.Threading.Tasks;
 
 namespace Models.DTOs.Requests
 {
-    internal class UpdateUserRequest
+    public class UpdateUserRequest
     {
+        public string? HoTen { get; set; }
+        public string? Email { get; set; }
+        public string? SoDienThoai { get; set; }
+
+        public int? VaiTroId { get; set; }
+        public bool? TrangThai { get; set; }
     }
 }
