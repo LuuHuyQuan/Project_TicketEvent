@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Repositories.Interfaces
+namespace Models
 {
-    internal class Class1
+    internal class RefreshToken
     {
     }
 }
