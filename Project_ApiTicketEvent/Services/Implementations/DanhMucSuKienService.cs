@@ -12,9 +12,9 @@ namespace Services.Implementations
 {
     public class DanhMucSuKienService:IDanhMucSuKienService
     {
-        private readonly IDanhMucSuKien _repo;
+        private readonly IDanhMucSuKienRepository _repo;
 
-        public DanhMucSuKienService(IDanhMucSuKien repo)
+        public DanhMucSuKienService(IDanhMucSuKienRepository repo)
         {
             _repo = repo;
         }

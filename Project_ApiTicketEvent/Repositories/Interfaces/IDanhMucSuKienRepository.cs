@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Repositories.Interfaces
 {
-    public interface IDanhMucSuKien
+    public interface IDanhMucSuKienRepository
     {
         Task<List<DanhMucSuKien>> GetAllAsync(bool? trangThai = true);
         Task<DanhMucSuKien?> GetByNameAsync(string tenDanhMuc, bool? trangThai = true);

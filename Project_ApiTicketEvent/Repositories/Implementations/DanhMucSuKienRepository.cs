@@ -9,7 +9,7 @@ using Models;
 using Repositories.Interfaces;
 namespace Repositories.Implementations
 {
-    public class DanhMucSuKienRepository:IDanhMucSuKien
+    public class DanhMucSuKienRepository:IDanhMucSuKienRepository
     {
         private readonly IDbConnectionFactory _connectionFactory;
 
