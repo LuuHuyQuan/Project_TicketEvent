@@ -1,18 +1,39 @@
-# Build outputs
+# =========================
+# .NET / C# build outputs
+# =========================
 **/bin/
 **/obj/
 
+# =========================
 # Visual Studio
+# =========================
 .vs/
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
 
+# =========================
 # VS Code
+# =========================
 .vscode/
 
+# =========================
 # Logs
+# =========================
 *.log
 
+# =========================
 # OS
+# =========================
 .DS_Store
 Thumbs.db
+
+# =========================
+# Optional (khuyên dùng)
+# =========================
+# Rider / JetBrains
+.idea/
+
+# NuGet packages cache (không bắt buộc)
+# packages/
