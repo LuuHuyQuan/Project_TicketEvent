@@ -126,33 +126,5 @@ namespace TicketEvent.Organizer.Controllers
                 return StatusCode(500, new { message = "Lỗi khi cập nhật sự kiện", error = ex.Message });
             }
         }
-
-        // DELETE: api/sukien/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
-        {
-            try
-            {
-                // Kiểm tra tồn tại
-                var existingSuKien = await _suKienRepository.GetByIdAsync(id);
-                if (existingSuKien == null)
-                {
-                    return NotFound(new { message = $"Không tìm thấy sự kiện với ID: {id}" });
-                }
-
-                var success = await _suKienRepository.DeleteAsync(id);
-
-                if (!success)
-                {
-                    return StatusCode(500, new { message = "Không thể xóa sự kiện" });
-                }
-
-                return Ok(new { message = "Xóa sự kiện thành công" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi khi xóa sự kiện", error = ex.Message });
-            }
-        }
     }
 }
