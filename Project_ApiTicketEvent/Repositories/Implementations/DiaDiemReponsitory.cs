@@ -17,6 +17,87 @@ namespace Repositories.Implementations
         {
             _connectionFactory = connectionFactory;
         }
+        public async Task<List<DiaDiem>> GetAllAsync(bool? trangThai = true)
+        {
+            var result = new List<DiaDiem>();
+
+            const string sql = @"
+            SELECT DiaDiemID, TenDiaDiem, DiaChi, SucChua, MoTa, TrangThai
+            FROM dbo.DiaDiem
+            WHERE (@TrangThai IS NULL OR TrangThai = @TrangThai)
+            ORDER BY TenDiaDiem;";
+
+            using var conn = _connectionFactory.CreateConnection();
+            if (conn.State != ConnectionState.Open) conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            var pTrangThai = cmd.CreateParameter();
+            pTrangThai.ParameterName = "@TrangThai";
+            pTrangThai.Value = (object?)trangThai ?? DBNull.Value;
+            cmd.Parameters.Add(pTrangThai);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                result.Add(new DiaDiem
+                {
+                    DiaDiemID = reader.GetInt32(reader.GetOrdinal("DiaDiemID")),
+                    TenDiaDiem = reader.GetString(reader.GetOrdinal("TenDiaDiem")),
+                    DiaChi = reader.GetString(reader.GetOrdinal("DiaChi")),
+                    SucChua = reader.IsDBNull(reader.GetOrdinal("SucChua")) ? null : reader.GetInt32(reader.GetOrdinal("SucChua")),
+                    MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? null : reader.GetString(reader.GetOrdinal("MoTa")),
+                    TrangThai = reader.GetBoolean(reader.GetOrdinal("TrangThai"))
+                });
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        public async Task<DiaDiem?> GetByNameAsync(string tenDiaDiem, bool? trangThai = true)
+        {
+            tenDiaDiem = (tenDiaDiem ?? string.Empty).Trim();
+            if (tenDiaDiem.Length == 0) return null;
+
+            const string sql = @"
+            SELECT TOP 1 DiaDiemID, TenDiaDiem, DiaChi, SucChua, MoTa, TrangThai
+            FROM dbo.DiaDiem
+            WHERE (@TrangThai IS NULL OR TrangThai = @TrangThai)
+              AND (TenDiaDiem = @Ten OR TenDiaDiem LIKE N'%' + @Ten + N'%')
+            ORDER BY CASE WHEN TenDiaDiem = @Ten THEN 0 ELSE 1 END, TenDiaDiem;";
+
+            using var conn = _connectionFactory.CreateConnection();
+            if (conn.State != ConnectionState.Open) conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            var pTen = cmd.CreateParameter();
+            pTen.ParameterName = "@Ten";
+            pTen.Value = tenDiaDiem;
+            cmd.Parameters.Add(pTen);
+
+            var pTrangThai = cmd.CreateParameter();
+            pTrangThai.ParameterName = "@TrangThai";
+            pTrangThai.Value = (object?)trangThai ?? DBNull.Value;
+            cmd.Parameters.Add(pTrangThai);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read()) return null;
+
+            var dto = new DiaDiem
+            {
+                DiaDiemID = reader.GetInt32(reader.GetOrdinal("DiaDiemID")),
+                TenDiaDiem = reader.GetString(reader.GetOrdinal("TenDiaDiem")),
+                DiaChi = reader.GetString(reader.GetOrdinal("DiaChi")),
+                SucChua = reader.IsDBNull(reader.GetOrdinal("SucChua")) ? null : reader.GetInt32(reader.GetOrdinal("SucChua")),
+                MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? null : reader.GetString(reader.GetOrdinal("MoTa")),
+                TrangThai = reader.GetBoolean(reader.GetOrdinal("TrangThai"))
+            };
+
+            return await Task.FromResult(dto);
+        }
         public int Create(DiaDiem entity)
         {
                 using var conn = _connectionFactory.CreateConnection();
