@@ -76,13 +76,28 @@ namespace Repositories.Implementations
             return rowsAffected > 0;
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> UpdateTrangThaiAsync(int id, byte trangThai)
         {
             using var connection = _connectionFactory.CreateConnection();
-            var sql = "DELETE FROM SuKien WHERE SuKienID = @Id";
+            var sql = @"UPDATE SuKien 
+                       SET TrangThai = @TrangThai
+                       WHERE SuKienID = @Id";
 
-            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
+            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id, TrangThai = trangThai });
             return rowsAffected > 0;
+        }
+
+        public async Task<IEnumerable<SuKien>> GetExpiredEventsAsync()
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            var sql = @"SELECT SuKienID, DanhMucID, DiaDiemID, ToChucID, TenSuKien, 
+                              MoTa, ThoiGianBatDau, ThoiGianKetThuc, AnhBiaUrl, 
+                              TrangThai, NgayTao 
+                       FROM SuKien 
+                       WHERE ThoiGianKetThuc <= @Now 
+                       AND TrangThai NOT IN (3, 4)";
+
+            return await connection.QueryAsync<SuKien>(sql, new { Now = DateTime.Now });
         }
     }
 }
