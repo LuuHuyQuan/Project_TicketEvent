@@ -6,7 +6,14 @@ using System.Threading.Tasks;
 
 namespace Repositories.Interfaces
 {
-    internal class INguoiDungRepository
-    {
-    }
+   public interface INguoiDungRepository
+   {
+       List<NguoiDung> GetAll();
+       NguoiDung? GetById(int id);
+       NguoiDung? GetByEmail(string email);
+
+       int Create(NguoiDung user);
+       bool Update(NguoiDung user);
+       bool SoftDelete(int id);
+   }
 }
