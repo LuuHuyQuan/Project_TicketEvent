@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Models.DTOs.Requests
 {
-    internal class LoginRequest
-    {
-    }
+    public class LoginRequest
+   {
+       public string TenDangNhap { get; set; } = null!;
+       public string Email { get; set; } = null!;
+       public string MatKhau { get; set; } = null!;
+   }
 }
