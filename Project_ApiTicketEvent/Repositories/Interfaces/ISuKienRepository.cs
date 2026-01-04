@@ -13,6 +13,7 @@ namespace Repositories.Interfaces
         Task<SuKien?> GetByIdAsync(int id);
         Task<int> CreateAsync(SuKien suKien);
         Task<bool> UpdateAsync(SuKien suKien);
-        Task<bool> DeleteAsync(int id);
+        Task<bool> UpdateTrangThaiAsync(int id, byte trangThai);
+        Task<IEnumerable<SuKien>> GetExpiredEventsAsync();
     }
 }
