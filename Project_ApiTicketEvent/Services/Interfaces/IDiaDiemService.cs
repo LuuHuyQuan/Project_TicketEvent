@@ -9,6 +9,8 @@ namespace Services.Interfaces
 {
     public interface IDiaDiemService
     {
+        Task<List<DiaDiem>> GetAllAsync();
+        Task<DiaDiem?> GetByNameAsync(string tenDiaDiem);
         int Create(DiaDiem entity);
         bool Update(DiaDiem entity);
         bool Delete(int id);
