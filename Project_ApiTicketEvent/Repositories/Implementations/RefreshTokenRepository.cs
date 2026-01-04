@@ -1,4 +1,5 @@
 using Data;
+using Microsoft.Data.SqlClient;
 using Models;
 using Repositories.Interfaces;
 using System;
@@ -10,71 +11,116 @@ using System.Threading.Tasks;
 
 namespace Repositories.Implementations
 {
-    public class VaiTroRepository : IVaiTroRepository
+    public class RefreshTokenRepository : IRefreshTokenRepository
     {
         private readonly IDbConnectionFactory _factory;
 
-        public VaiTroRepository(IDbConnectionFactory factory)
+        public RefreshTokenRepository(IDbConnectionFactory factory)
         {
             _factory = factory;
         }
 
-        public List<VaiTro> GetAll()
+        public int Create(RefreshToken token)
         {
-            var list = new List<VaiTro>();
+            const string sql = @"
+            INSERT INTO dbo.RefreshToken (UserId, Token, JwtId, ExpiresAt, CreatedAt, RevokedAt, IsRevoked, IsUsed)
+            VALUES (@UserId, @Token, @JwtId, @ExpiresAt, @CreatedAt, @RevokedAt, @IsRevoked, @IsUsed);
+            SELECT CAST(SCOPE_IDENTITY() AS int);";
 
             using var conn = _factory.CreateConnection();
             conn.Open();
 
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-            SELECT VaiTroId AS VaiTroID, MaVaiTro, TenVaiTro, NgayTao
-            FROM dbo.VaiTro
-            ORDER BY VaiTroId DESC;";
+            cmd.CommandText = sql;
 
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                list.Add(Map(reader));
-            }
+            AddParam(cmd, "@UserId", token.UserId);
+            AddParam(cmd, "@Token", token.Token);
+            AddParam(cmd, "@JwtId", token.JwtId);
+            AddParam(cmd, "@ExpiresAt", token.ExpiresAt);
+            AddParam(cmd, "@CreatedAt", token.CreatedAt);
+            AddParam(cmd, "@RevokedAt", token.RevokedAt);
+            AddParam(cmd, "@IsRevoked", token.IsRevoked);
+            AddParam(cmd, "@IsUsed", token.IsUsed);
 
-            return list;
+            var newIdObj = cmd.ExecuteScalar();
+            return newIdObj == null ? 0 : Convert.ToInt32(newIdObj);
         }
-        public VaiTro? GetById(int id)
+
+        public RefreshToken? GetByToken(string token)
         {
+            const string sql = @"
+            SELECT TOP 1 RefreshTokenId, UserId, Token, JwtId, ExpiresAt, CreatedAt, RevokedAt, IsRevoked, IsUsed
+            FROM dbo.RefreshToken
+            WHERE Token = @Token;";
+
             using var conn = _factory.CreateConnection();
             conn.Open();
 
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-            SELECT TOP 1 VaiTroId AS VaiTroID, MaVaiTro, TenVaiTro, NgayTao
-            FROM dbo.VaiTro
-            WHERE VaiTroId = @Id;";
-
-            AddParam(cmd, "@Id", id);
+            cmd.CommandText = sql;
+            AddParam(cmd, "@Token", token);
 
             using var reader = cmd.ExecuteReader();
             if (!reader.Read()) return null;
 
             return Map(reader);
         }
-        public VaiTro? GetByMa(string maVaiTro)
+
+        public bool MarkUsed(int refreshTokenId)
         {
+            const string sql = @"
+            UPDATE dbo.RefreshToken
+            SET IsUsed = 1
+            WHERE RefreshTokenId = @Id AND IsUsed = 0;";
+
             using var conn = _factory.CreateConnection();
             conn.Open();
 
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-            SELECT TOP 1 VaiTroId AS VaiTroID, MaVaiTro, TenVaiTro, NgayTao
-            FROM dbo.VaiTro
-            WHERE MaVaiTro = @Ma;";
+            cmd.CommandText = sql;
+            AddParam(cmd, "@Id", refreshTokenId);
 
-            AddParam(cmd, "@Ma", maVaiTro);
+            return cmd.ExecuteNonQuery() > 0;
+        }
 
-            using var reader = cmd.ExecuteReader();
-            if (!reader.Read()) return null;
+        public bool Revoke(int refreshTokenId)
+        {
+            const string sql = @"
+            UPDATE dbo.RefreshToken
+            SET IsRevoked = 1,
+                RevokedAt = ISNULL(RevokedAt, @Now)
+            WHERE RefreshTokenId = @Id AND IsRevoked = 0;";
 
-            return Map(reader);
+            using var conn = _factory.CreateConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            AddParam(cmd, "@Id", refreshTokenId);
+            AddParam(cmd, "@Now", DateTime.UtcNow);
+
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        public bool RevokeAllByUser(int userId)
+        {
+            const string sql = @"
+            UPDATE dbo.RefreshToken
+            SET IsRevoked = 1,
+                RevokedAt = ISNULL(RevokedAt, @Now)
+            WHERE UserId = @UserId AND IsRevoked = 0;";
+
+            using var conn = _factory.CreateConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            AddParam(cmd, "@UserId", userId);
+            AddParam(cmd, "@Now", DateTime.UtcNow);
+
+            return cmd.ExecuteNonQuery() > 0;
         }
 
         private static void AddParam(IDbCommand cmd, string name, object? value)
@@ -85,14 +131,19 @@ namespace Repositories.Implementations
             cmd.Parameters.Add(p);
         }
 
-        private static VaiTro Map(IDataRecord r)
+        private static RefreshToken Map(IDataRecord r)
         {
-            return new VaiTro
+            return new RefreshToken
             {
-                VaiTroID = Convert.ToInt32(r["VaiTroID"]),
-                MaVaiTro = r["MaVaiTro"]?.ToString() ?? "",
-                TenVaiTro = r["TenVaiTro"]?.ToString() ?? "",
-                NgayTao = r["NgayTao"] == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(r["NgayTao"])
+                RefreshTokenId = Convert.ToInt32(r["RefreshTokenId"]),
+                UserId = Convert.ToInt32(r["UserId"]),
+                Token = r["Token"]?.ToString() ?? "",
+                JwtId = r["JwtId"]?.ToString() ?? "",
+                ExpiresAt = Convert.ToDateTime(r["ExpiresAt"]),
+                CreatedAt = Convert.ToDateTime(r["CreatedAt"]),
+                RevokedAt = r["RevokedAt"] == DBNull.Value ? null : (DateTime?)Convert.ToDateTime(r["RevokedAt"]),
+                IsRevoked = Convert.ToBoolean(r["IsRevoked"]),
+                IsUsed = Convert.ToBoolean(r["IsUsed"]),
             };
         }
     }
