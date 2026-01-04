@@ -7,21 +7,20 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 namespace Data
 {
-   public interface ISqlConnectionFactory
+      public class SqlConnectionFactory : IDbConnectionFactory
     {
-        SqlConnection Create();
-    }
-    public class SqlConnectionFactory : ISqlConnectionFactory
-    {
-        private readonly string _cs;
+        private readonly string _connectionString;
+
         public SqlConnectionFactory(IConfiguration configuration)
         {
-            _cs = configuration.GetConnectionString("Default")
-             ?? throw new InvalidOperationException("Missing ConnectionStrings:Default");
+            _connectionString = configuration.GetConnectionString("TicketDb")
+                ?? throw new InvalidOperationException(
+                    "Missing connection string 'TicketDb' in appsettings.json");
         }
-        public SqlConnection Create()
+
+        public IDbConnection CreateConnection()
         {
-            return new SqlConnection(_cs);
+            return new SqlConnection(_connectionString);
         }
     }
 }
