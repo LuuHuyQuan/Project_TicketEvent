@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Data
 {
-    internal class IDbConnectionFactory
+    public interface IDbConnectionFactory
     {
+        IDbConnection CreateConnection();
     }
 }
