@@ -44,16 +44,10 @@ namespace TicketEvent.Attendee.Controllers
         // GET: /api/SuKien/by-category?id=3
         // hoặc GET: /api/SuKien/by-category?tenDanhMuc=Workshop
         [HttpGet("by-category")]
-        public async Task<IActionResult> GetByCategory([FromQuery] int? id, [FromQuery] string? tenDanhMuc)
+        public async Task<IActionResult> GetByCategory( [FromQuery] string? tenDanhMuc)
         {
-            if (id is null && string.IsNullOrWhiteSpace(tenDanhMuc))
-                return BadRequest(new { message = "Cần truyền id hoặc tenDanhMuc" });
-
-            if (id is not null)
-            {
-                var data = await _repo.GetByDanhMucIdAsync(id.Value, trangThai: true);
-                return Ok(data);
-            }
+            if ( string.IsNullOrWhiteSpace(tenDanhMuc))
+                return BadRequest(new { message = "Cần truyền tenDanhMuc" });
 
             var dataByName = await _repo.GetByDanhMucNameAsync(tenDanhMuc!, trangThai: true);
             return Ok(dataByName);

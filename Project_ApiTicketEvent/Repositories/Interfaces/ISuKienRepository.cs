@@ -12,7 +12,6 @@ namespace Repositories.Interfaces
     {
         Task<IEnumerable<SuKien>> GetAllAsync();
         Task<List<SuKienRequest>> GetByNameAsync(string tenSuKien, bool? trangThai = true);
-        Task<List<SuKienRequest>> GetByDanhMucIdAsync(int danhMucId, bool? trangThai = true);
         Task<List<SuKienRequest>> GetByDanhMucNameAsync(string tenDanhMuc, bool? trangThai = true);
         Task<SuKien?> GetByIdAsync(int id);
         Task<int> CreateAsync(SuKien suKien);

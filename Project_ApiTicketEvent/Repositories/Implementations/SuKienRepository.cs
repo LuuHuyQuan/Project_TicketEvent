@@ -58,27 +58,6 @@ namespace Repositories.Implementations
                 ("@TrangThai", (object?)trangThai ?? DBNull.Value));
         }
 
-        public async Task<List<SuKienRequest>> GetByDanhMucIdAsync(int danhMucId, bool? trangThai = true)
-        {
-            const string sql = @"
-            SELECT 
-                sk.SuKienID, sk.TenSuKien, sk.DanhMucID,
-                dm.TenDanhMuc,
-                sk.DiaDiemID, dd.TenDiaDiem,
-                sk.ThoiGianBatDau, sk.ThoiGianKetThuc,
-                sk.MoTa, sk.TrangThai
-            FROM dbo.SuKien sk
-            JOIN dbo.DanhMucSuKien dm ON dm.DanhMucID = sk.DanhMucID
-            LEFT JOIN dbo.DiaDiem dd ON dd.DiaDiemID = sk.DiaDiemID
-            WHERE (@TrangThai IS NULL OR sk.TrangThai = @TrangThai)
-              AND sk.DanhMucID = @DanhMucID
-            ORDER BY sk.ThoiGianBatDau DESC;";
-
-            return await QueryListAsync(sql,
-                ("@DanhMucID", danhMucId),
-                ("@TrangThai", (object?)trangThai ?? DBNull.Value));
-        }
-
         public async Task<List<SuKienRequest>> GetByDanhMucNameAsync(string tenDanhMuc, bool? trangThai = true)
         {
             tenDanhMuc = (tenDanhMuc ?? string.Empty).Trim();
