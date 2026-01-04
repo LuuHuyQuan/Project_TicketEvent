@@ -17,7 +17,11 @@ namespace Services.Implementations
         {
             _repo = repo;
         }
+        public Task<List<DiaDiem>> GetAllAsync()
+           => _repo.GetAllAsync(trangThai: true);
 
+        public Task<DiaDiem?> GetByNameAsync(string tenDiaDiem)
+            => _repo.GetByNameAsync(tenDiaDiem, trangThai: true);
         public int Create(DiaDiem entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
