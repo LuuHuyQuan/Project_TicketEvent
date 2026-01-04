@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace Repositories.Interfaces
 {
-    internal class IRefreshTokenRepository
+    public interface IRefreshTokenRepository
     {
+        int Create(RefreshToken token);
+        RefreshToken? GetByToken(string token);
+        bool MarkUsed(int refreshTokenId);
+        bool Revoke(int refreshTokenId);
+        bool RevokeAllByUser(int userId);
     }
 }
