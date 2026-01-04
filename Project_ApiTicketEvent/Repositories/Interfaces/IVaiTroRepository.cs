@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Repositories.Interfaces
 {
-    internal interface IVaiTroRepository
+    public interface IVaiTroRepository
     {
+        List<VaiTro> GetAll();
+        VaiTro? GetById(int id);
+        VaiTro? GetByMa(string maVaiTro);
     }
 }
