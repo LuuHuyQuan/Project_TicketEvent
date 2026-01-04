@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{262C6A48-AE34-D77E-44A9-AF0CD30983F0}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketEvent.Admin", "TicketEvent.Admin\TicketEvent.Admin.csproj", "{717E7B8C-EBF6-B280-A6C9-D4FB2055DA31}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketEvent.Login", "TicketEvent.Login\TicketEvent.Login.csproj", "{AB551E64-9308-E577-413C-1A354885F504}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketEvent.Attendee", "TicketEvent.Attendee\TicketEvent.Attendee.csproj", "{18D8EA91-A5B6-7E1C-E704-901865902939}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{AB551E64-9308-E577-413C-1A354885F504}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB551E64-9308-E577-413C-1A354885F504}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB551E64-9308-E577-413C-1A354885F504}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18D8EA91-A5B6-7E1C-E704-901865902939}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18D8EA91-A5B6-7E1C-E704-901865902939}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18D8EA91-A5B6-7E1C-E704-901865902939}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18D8EA91-A5B6-7E1C-E704-901865902939}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
