@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Services.Interfaces
+namespace Data
 {
-    internal class Class1
+    public interface IDbConnectionFactory
     {
+        IDbConnection CreateConnection();
     }
 }
