@@ -1,6 +1,8 @@
 using Data;
 using Repositories.Implementations;
 using Repositories.Interfaces;
+using Services.Implementations;
+using Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
 builder.Services.AddScoped<IDiaDiemReponsitory, DiaDiemReponsitory>();
-builder.Services.AddScoped<IDiaDiemReponsitory, DiaDiemReponsitory>();
+builder.Services.AddScoped<IDiaDiemService, DiaDiemService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
