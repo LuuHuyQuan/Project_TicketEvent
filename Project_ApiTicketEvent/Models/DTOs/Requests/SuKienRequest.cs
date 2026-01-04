@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Models.DTOs.Requests
 {
-    public class SuKienDto
+    public class SuKienRequest
     {
         public int SuKienID { get; set; }
         public string TenSuKien { get; set; } = string.Empty;
@@ -21,7 +21,6 @@ namespace Models.DTOs.Requests
         public DateTime? ThoiGianKetThuc { get; set; }
 
         public string? MoTa { get; set; }
-        public string? AnhBia { get; set; }
 
         public bool TrangThai { get; set; }
     }
