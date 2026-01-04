@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Repositories.Interfaces;
+using Services.Interfaces;
 
 namespace TicketEvent.Admin.Controllers
 {
@@ -9,41 +10,69 @@ namespace TicketEvent.Admin.Controllers
     [ApiController]
     public class DiaDiemAdminController : ControllerBase
     {
-        private readonly IDiaDiemReponsitory _repo;
+        private readonly IDiaDiemService _service;
 
-        public DiaDiemAdminController(IDiaDiemReponsitory repo)
+        public DiaDiemAdminController(IDiaDiemService service)
         {
-            _repo = repo;
+            _service = service;
         }
-     
+
         [HttpPost]
         public IActionResult Create([FromBody] DiaDiem model)
         {
-            model.TrangThai = true;
+            if (model == null) return BadRequest(new { success = false, message = "Body rỗng." });
 
-            var newId = _repo.Create(model);
-            return Ok(new { success = true, message = "Tạo địa điểm thành công", id = newId });
+            try
+            {
+                // Service sẽ tự set TrangThai = true (nếu bạn làm theo cách 1 mình hướng dẫn)
+                var newId = _service.Create(model);
+                return CreatedAtAction(nameof(Update), new { id = newId },
+                    new { success = true, message = "Tạo địa điểm thành công", id = newId });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
+
         [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] DiaDiem model)
         {
+            if (model == null) return BadRequest(new { success = false, message = "Body rỗng." });
+            if (id <= 0) return BadRequest(new { success = false, message = "Id không hợp lệ." });
+
+            // ép id theo route
             model.DiaDiemID = id;
 
-            var ok = _repo.Update(model);
-            if (!ok)
-                return Ok(new { success = false, message = "Cập nhật thất bại" });
+            try
+            {
+                var ok = _service.Update(model);
+                if (!ok) return NotFound(new { success = false, message = "Không tìm thấy địa điểm để cập nhật." });
 
-            return Ok(new { success = true, message = "Cập nhật thành công" });
+                return Ok(new { success = true, message = "Cập nhật thành công" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
-            var ok = _repo.Delete(id);
-            if (!ok)
-                return Ok(new { success = false, message = "Xóa thất bại" });
+            if (id <= 0) return BadRequest(new { success = false, message = "Id không hợp lệ." });
 
-            return Ok(new { success = true, message = "Xóa thành công" });
+            try
+            {
+                var ok = _service.Delete(id);
+                if (!ok) return NotFound(new { success = false, message = "Không tìm thấy địa điểm để xóa." });
+
+                return Ok(new { success = true, message = "Xóa thành công" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
     }
 }
