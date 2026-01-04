@@ -1,0 +1,6 @@
+@TicketEvent.Attendee_HostAddress = http://localhost:5231
+
+GET {{TicketEvent.Attendee_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
