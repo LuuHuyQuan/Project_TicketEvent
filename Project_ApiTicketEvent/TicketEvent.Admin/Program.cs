@@ -12,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
 builder.Services.AddScoped<IDiaDiemReponsitory, DiaDiemReponsitory>();
+builder.Services.AddScoped<IDiaDiemReponsitory, DiaDiemReponsitory>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
