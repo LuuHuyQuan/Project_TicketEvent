@@ -11,5 +11,8 @@ namespace Repositories.Interfaces
     {
         Task<List<DanhMucSuKien>> GetAllAsync(bool? trangThai = true);
         Task<DanhMucSuKien?> GetByNameAsync(string tenDanhMuc, bool? trangThai = true);
+        int Create(DanhMucSuKien entity);
+        bool Update(DanhMucSuKien entity);
+        bool Delete(int id);
     }
 }
