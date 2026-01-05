@@ -8,7 +8,7 @@ namespace TicketEvent.Login.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "ADMIN")]
     public class UsersController : ControllerBase
     {
         private readonly INguoiDungRepository _userRepo;
