@@ -1,19 +1,94 @@
 {
   "Routes": [
     {
+      "UpstreamPathTemplate": "/api/auth/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH" ],
+      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7072
+        }
+      ],
+      "HttpHandlerOptions": { "DangerousAcceptAnyServerCertificateValidator": true },
+      "Priority": 1
+    },
+    {
+      "UpstreamPathTemplate": "/api/roles/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH" ],
+      "DownstreamPathTemplate": "/api/roles/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7072
+        }
+      ],
+      "HttpHandlerOptions": { "DangerousAcceptAnyServerCertificateValidator": true },
+      "Priority": 1
+    },
+    {
+      "UpstreamPathTemplate": "/api/users/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH" ],
+      "DownstreamPathTemplate": "/api/users/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7072
+        }
+      ],
+      "HttpHandlerOptions": { "DangerousAcceptAnyServerCertificateValidator": true },
+      "Priority": 1
+    },
+
+    {
+      "UpstreamPathTemplate": "/api/admin/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH" ],
+      "DownstreamPathTemplate": "/api/admin/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 44308
+        }
+      ],
+      "HttpHandlerOptions": { "DangerousAcceptAnyServerCertificateValidator": true },
+      "Priority": 2
+    },
+
+    {
+      "UpstreamPathTemplate": "/api/danhmucsukien/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH" ],
+      "DownstreamPathTemplate": "/api/danhmucsukien/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 44308
+        }
+      ],
+      "HttpHandlerOptions": { "DangerousAcceptAnyServerCertificateValidator": true },
+      "Priority": 2
+    },
+
+    {
+      "UpstreamPathTemplate": "/api/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH" ],
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44310
+          "Port": 44308
         }
       ],
-      "UpstreamPathTemplate": "/attendee/api/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ]
+      "HttpHandlerOptions": { "DangerousAcceptAnyServerCertificateValidator": true },
+      "Priority": 99
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "https://localhost:9000"
+    "BaseUrl": "http://localhost:7001"
   }
 }
