@@ -6,7 +6,16 @@ using System.Threading.Tasks;
 
 namespace Models.DTOs.Requests
 {
-    internal class LoaiVeRequest
+    public class LoaiVeRequest
     {
+        public class GetLoaiVeByNameRequest
+        {
+            public string Ten { get; set; } = string.Empty;
+        }
+
+        public class GetLoaiVeByEventRequest
+        {
+            public int SuKienId { get; set; }
+        }
     }
 }
