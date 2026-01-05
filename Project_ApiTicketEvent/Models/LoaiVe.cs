@@ -12,13 +12,20 @@ namespace Models
         public int SuKienID { get; set; }
 
         public string TenLoaiVe { get; set; } = string.Empty;
-
-        public decimal GiaVe { get; set; }
-        public int? SoLuong { get; set; }
-
         public string? MoTa { get; set; }
 
-        // DB của bạn hay là tinyint nên dùng byte để khỏi lỗi cast
-        public byte TrangThai { get; set; }
+        public decimal DonGia { get; set; }
+
+        public int SoLuongToiDa { get; set; }
+        public int SoLuongDaBan { get; set; }
+
+        // tiện hiển thị (không phải cột DB)
+        public int SoLuongCon => SoLuongToiDa - SoLuongDaBan;
+
+        public int? GioiHanMoiKhach { get; set; }
+        public DateTime? ThoiGianMoBan { get; set; }
+        public DateTime? ThoiGianDongBan { get; set; }
+
+        public bool TrangThai { get; set; } // BIT
     }
 }

@@ -20,54 +20,64 @@ namespace Repositories.Implementations
         }
 
         // 1) GET ALL
-        public Task<List<LoaiVe>> GetAllAsync(byte? trangThai = 1)
+        public Task<List<LoaiVe>> GetAllAsync(bool? trangThai = true)
         {
             const string sql = @"
-SELECT LoaiVeID, SuKienID, TenLoaiVe, GiaVe, SoLuong, MoTa, TrangThai
+SELECT LoaiVeID, SuKienID, TenLoaiVe, MoTa, DonGia,
+       SoLuongToiDa, SoLuongDaBan, GioiHanMoiKhach,
+       ThoiGianMoBan, ThoiGianDongBan, TrangThai
 FROM dbo.LoaiVe
 WHERE (@TrangThai IS NULL OR TrangThai = @TrangThai)
-ORDER BY SuKienID, GiaVe;";
+ORDER BY SuKienID, DonGia;";
 
-            return QueryListAsync(sql,
-                ("@TrangThai", (object?)trangThai ?? DBNull.Value));
+            return QueryListAsync(sql, ("@TrangThai", (object?)trangThai ?? DBNull.Value));
         }
 
         // 2) GET BY NAME
-        public Task<List<LoaiVe>> GetByNameAsync(string tenLoaiVe, byte? trangThai = 1)
+        public Task<List<LoaiVe>> GetByNameAsync(string tenLoaiVe, bool? trangThai = true)
         {
             tenLoaiVe = (tenLoaiVe ?? string.Empty).Trim();
             if (tenLoaiVe.Length == 0) return Task.FromResult(new List<LoaiVe>());
 
             const string sql = @"
-SELECT LoaiVeID, SuKienID, TenLoaiVe, GiaVe, SoLuong, MoTa, TrangThai
+SELECT LoaiVeID, SuKienID, TenLoaiVe, MoTa, DonGia,
+       SoLuongToiDa, SoLuongDaBan, GioiHanMoiKhach,
+       ThoiGianMoBan, ThoiGianDongBan, TrangThai
 FROM dbo.LoaiVe
 WHERE (@TrangThai IS NULL OR TrangThai = @TrangThai)
   AND (TenLoaiVe = @Ten OR TenLoaiVe LIKE N'%' + @Ten + N'%')
 ORDER BY
   CASE WHEN TenLoaiVe = @Ten THEN 0 ELSE 1 END,
-  SuKienID, GiaVe;";
+  SuKienID, DonGia;";
 
             return QueryListAsync(sql,
                 ("@Ten", tenLoaiVe),
                 ("@TrangThai", (object?)trangThai ?? DBNull.Value));
         }
 
-        // 3) GET BY EVENT (SuKienID)
-        public Task<List<LoaiVe>> GetBySuKienIdAsync(int suKienId, byte? trangThai = 1)
+        public Task<List<LoaiVe>> GetByTenSuKienAsync(string tenSuKien, bool? trangThai = true)
         {
+            tenSuKien = (tenSuKien ?? string.Empty).Trim();
+            if (tenSuKien.Length == 0) return Task.FromResult(new List<LoaiVe>());
+
             const string sql = @"
-SELECT LoaiVeID, SuKienID, TenLoaiVe, GiaVe, SoLuong, MoTa, TrangThai
-FROM dbo.LoaiVe
-WHERE (@TrangThai IS NULL OR TrangThai = @TrangThai)
-  AND SuKienID = @SuKienID
-ORDER BY GiaVe;";
+SELECT 
+    lv.LoaiVeID, lv.SuKienID, lv.TenLoaiVe, lv.MoTa, lv.DonGia,
+    lv.SoLuongToiDa, lv.SoLuongDaBan, lv.GioiHanMoiKhach,
+    lv.ThoiGianMoBan, lv.ThoiGianDongBan, lv.TrangThai
+FROM dbo.LoaiVe lv
+JOIN dbo.SuKien sk ON sk.SuKienID = lv.SuKienID
+WHERE (@TrangThai IS NULL OR lv.TrangThai = @TrangThai)
+  AND (sk.TenSuKien = @Ten OR sk.TenSuKien LIKE N'%' + @Ten + N'%')
+ORDER BY 
+  CASE WHEN sk.TenSuKien = @Ten THEN 0 ELSE 1 END,
+  lv.DonGia;";
 
             return QueryListAsync(sql,
-                ("@SuKienID", suKienId),
+                ("@Ten", tenSuKien),
                 ("@TrangThai", (object?)trangThai ?? DBNull.Value));
         }
 
-        // Common mapper
         private Task<List<LoaiVe>> QueryListAsync(string sql, params (string Name, object Value)[] parameters)
         {
             var result = new List<LoaiVe>();
@@ -94,10 +104,14 @@ ORDER BY GiaVe;";
                     LoaiVeID = reader.GetInt32(reader.GetOrdinal("LoaiVeID")),
                     SuKienID = reader.GetInt32(reader.GetOrdinal("SuKienID")),
                     TenLoaiVe = reader.GetString(reader.GetOrdinal("TenLoaiVe")),
-                    GiaVe = reader.GetDecimal(reader.GetOrdinal("GiaVe")),
-                    SoLuong = reader.IsDBNull(reader.GetOrdinal("SoLuong")) ? null : reader.GetInt32(reader.GetOrdinal("SoLuong")),
                     MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? null : reader.GetString(reader.GetOrdinal("MoTa")),
-                    TrangThai = Convert.ToByte(reader["TrangThai"]) // tinyint-safe
+                    DonGia = reader.GetDecimal(reader.GetOrdinal("DonGia")),
+                    SoLuongToiDa = reader.GetInt32(reader.GetOrdinal("SoLuongToiDa")),
+                    SoLuongDaBan = reader.GetInt32(reader.GetOrdinal("SoLuongDaBan")),
+                    GioiHanMoiKhach = reader.IsDBNull(reader.GetOrdinal("GioiHanMoiKhach")) ? null : reader.GetInt32(reader.GetOrdinal("GioiHanMoiKhach")),
+                    ThoiGianMoBan = reader.IsDBNull(reader.GetOrdinal("ThoiGianMoBan")) ? null : reader.GetDateTime(reader.GetOrdinal("ThoiGianMoBan")),
+                    ThoiGianDongBan = reader.IsDBNull(reader.GetOrdinal("ThoiGianDongBan")) ? null : reader.GetDateTime(reader.GetOrdinal("ThoiGianDongBan")),
+                    TrangThai = reader.GetBoolean(reader.GetOrdinal("TrangThai")) // BIT -> bool
                 });
             }
 

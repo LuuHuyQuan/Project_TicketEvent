@@ -15,7 +15,7 @@ namespace Models.DTOs.Requests
 
         public class GetLoaiVeByEventRequest
         {
-            public int SuKienId { get; set; }
+            public string TenSuKien { get; set; } = string.Empty;
         }
     }
 }

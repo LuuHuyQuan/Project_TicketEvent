@@ -9,8 +9,8 @@ namespace Repositories.Interfaces
 {
     public interface ILoaiVeRepository
     {
-        Task<List<LoaiVe>> GetAllAsync(byte? trangThai = 1);
-        Task<List<LoaiVe>> GetByNameAsync(string tenLoaiVe, byte? trangThai = 1);
-        Task<List<LoaiVe>> GetBySuKienIdAsync(int suKienId, byte? trangThai = 1);
+        Task<List<LoaiVe>> GetAllAsync(bool? trangThai = true);
+        Task<List<LoaiVe>> GetByNameAsync(string tenLoaiVe, bool? trangThai = true);
+        Task<List<LoaiVe>> GetByTenSuKienAsync(string tenSuKien, bool? trangThai = true);
     }
 }

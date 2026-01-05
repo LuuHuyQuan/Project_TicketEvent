@@ -16,34 +16,34 @@ namespace TicketEvent.Attendee.Controllers
             _repo = repo;
         }
 
-        // A) GET /api/LoaiVe
+        // GET: /api/LoaiVe
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            // Attendee: mặc định chỉ lấy TrangThai=1
-            var data = await _repo.GetAllAsync(trangThai: 1);
+            // Attendee: mặc định chỉ lấy loại vé đang bán (TrangThai=1)
+            var data = await _repo.GetAllAsync(trangThai: true);
             return Ok(data);
         }
 
-        // B) GET /api/LoaiVe/by-name?ten=VIP
+        // GET: /api/LoaiVe/by-name?ten=VIP
         [HttpGet("by-name")]
         public async Task<IActionResult> GetByName([FromQuery] GetLoaiVeByNameRequest req)
         {
             if (req == null || string.IsNullOrWhiteSpace(req.Ten))
                 return BadRequest(new { message = "Thiếu query parameter: ten" });
 
-            var data = await _repo.GetByNameAsync(req.Ten, trangThai: 1);
+            var data = await _repo.GetByNameAsync(req.Ten, trangThai: true);
             return Ok(data);
         }
 
-        // C) GET /api/LoaiVe/by-event?suKienId=2
-        [HttpGet("by-event")]
-        public async Task<IActionResult> GetByEvent([FromQuery] GetLoaiVeByEventRequest req)
+        // GET: /api/LoaiVe/by-event-name?tenSuKien=Concert
+        [HttpGet("by-event-name")]
+        public async Task<IActionResult> GetByTenSuKien([FromQuery] GetLoaiVeByEventRequest req)
         {
-            if (req == null || req.SuKienId <= 0)
-                return BadRequest(new { message = "suKienId invalid" });
+            if (req == null || string.IsNullOrWhiteSpace(req.TenSuKien))
+                return BadRequest(new { message = "Thiếu query parameter: tenSuKien" });
 
-            var data = await _repo.GetBySuKienIdAsync(req.SuKienId, trangThai: 1);
+            var data = await _repo.GetByTenSuKienAsync(req.TenSuKien, trangThai: true);
             return Ok(data);
         }
     }
