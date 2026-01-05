@@ -32,7 +32,17 @@ namespace TicketEvent.Login.Controllers
 
             return Ok(user);
         }
+        [HttpGet("by-role/{maVaiTro}")]
+        public IActionResult GetByMaVaiTro(string maVaiTro)
+        {
+            if (string.IsNullOrWhiteSpace(maVaiTro))
+                return BadRequest(new { message = "MaVaiTro không được để trống." });
 
+            maVaiTro = maVaiTro.Trim().ToUpperInvariant();
+
+            var users = _userRepo.GetByMaVaiTro(maVaiTro);
+            return Ok(new { maVaiTro, count = users.Count, data = users });
+        }
         [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] UpdateUserRequest request)
         {

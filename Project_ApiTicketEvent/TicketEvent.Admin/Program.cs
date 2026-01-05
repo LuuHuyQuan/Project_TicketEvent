@@ -15,6 +15,7 @@ builder.Services.AddScoped<IDiaDiemReponsitory, DiaDiemReponsitory>();
 builder.Services.AddScoped<IDiaDiemService, DiaDiemService>();
 builder.Services.AddScoped<IDanhMucSuKienRepository, DanhMucSuKienRepository>();
 builder.Services.AddScoped<ISuKienRepository, SuKienRepository>();
+builder.Services.AddScoped<IDanhMucSuKienService, DanhMucSuKienService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
