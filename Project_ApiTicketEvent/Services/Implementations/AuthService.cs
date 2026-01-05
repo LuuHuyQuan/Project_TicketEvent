@@ -98,6 +98,7 @@ namespace Services.Implementations
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub,   user.NguoiDungId.ToString()),
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.TenDangNhap),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti,   jti),
                 new Claim("fullName",                    user.HoTen),
