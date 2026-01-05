@@ -18,5 +18,10 @@ namespace Repositories.Interfaces
         Task<bool> UpdateAsync(SuKien suKien);
         Task<bool> UpdateTrangThaiAsync(int id, byte trangThai);
         Task<IEnumerable<SuKien>> GetExpiredEventsAsync();
+        List<SuKien> GetPending();    
+        byte? GetStatusById(int id);   
+
+        bool Approve(int id);       
+        bool Cancel(int id);
     }
 }
