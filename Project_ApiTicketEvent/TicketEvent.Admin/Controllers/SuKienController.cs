@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Models;
 using Repositories.Interfaces;
 
 namespace TicketEvent.Admin.Controllers
@@ -13,7 +14,39 @@ namespace TicketEvent.Admin.Controllers
         {
             _repo = repo;
         }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<SuKien>>> GetAll()
+        {
+            try
+            {
+                var suKiens = await _repo.GetAllAsync();
+                return Ok(suKiens);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi lấy danh sách sự kiện", error = ex.Message });
+            }
+        }
+        [HttpGet("by-name")]
+        public async Task<IActionResult> GetByName([FromQuery] string ten)
+        {
+            if (string.IsNullOrWhiteSpace(ten))
+                return BadRequest(new { message = "Thiếu query parameter: ten" });
 
+            var data = await _repo.GetByNameAsync(ten, trangThai: true);
+            return Ok(data);
+        }
+
+      
+        [HttpGet("by-category")]
+        public async Task<IActionResult> GetByCategory([FromQuery] string? tenDanhMuc)
+        {
+            if (string.IsNullOrWhiteSpace(tenDanhMuc))
+                return BadRequest(new { message = "Cần truyền tenDanhMuc" });
+
+            var dataByName = await _repo.GetByDanhMucNameAsync(tenDanhMuc!, trangThai: true);
+            return Ok(dataByName);
+        }
         [HttpGet("pending")]
         public IActionResult GetPending()
         {
