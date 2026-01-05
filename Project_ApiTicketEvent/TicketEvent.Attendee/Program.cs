@@ -15,6 +15,9 @@ builder.Services.AddScoped<IDanhMucSuKienService, DanhMucSuKienService>();
 builder.Services.AddScoped<IDiaDiemReponsitory, DiaDiemReponsitory>();
 builder.Services.AddScoped<IDiaDiemService, DiaDiemService>();
 builder.Services.AddScoped<ISuKienRepository, SuKienRepository>();
+builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
+builder.Services.AddScoped<ILoaiVeRepository, LoaiVeRepository>();
+builder.Services.AddScoped<IThanhToanRepository, ThanhToanRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
