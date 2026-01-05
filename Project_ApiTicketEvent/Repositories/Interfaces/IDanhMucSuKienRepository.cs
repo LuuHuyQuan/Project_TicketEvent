@@ -14,5 +14,6 @@ namespace Repositories.Interfaces
         int Create(DanhMucSuKien entity);
         bool Update(DanhMucSuKien entity);
         bool Delete(int id);
+        DanhMucSuKien? GetById(int id);
     }
 }
