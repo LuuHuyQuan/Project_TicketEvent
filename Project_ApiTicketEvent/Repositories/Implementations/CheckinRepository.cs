@@ -25,7 +25,7 @@ namespace Repositories.Implementations
             using var connection = _connectionFactory.CreateConnection();
             var sql = @"SELECT CheckinID, VeID, SuKienID, NhanVienID, 
                               ThoiGianCheckin, KetQua, GhiChu 
-                       FROM Checkin 
+                       FROM NhatKyCheckIn 
                        ORDER BY ThoiGianCheckin DESC";
 
             return await connection.QueryAsync<NhatKyCheckIn>(sql);
@@ -36,7 +36,7 @@ namespace Repositories.Implementations
             using var connection = _connectionFactory.CreateConnection();
             var sql = @"SELECT CheckinID, VeID, SuKienID, NhanVienID, 
                               ThoiGianCheckin, KetQua, GhiChu 
-                       FROM Checkin 
+                       FROM NhatKyCheckIn 
                        WHERE CheckinID = @Id";
 
             return await connection.QueryFirstOrDefaultAsync<NhatKyCheckIn>(sql, new { Id = id });
@@ -47,7 +47,7 @@ namespace Repositories.Implementations
             using var connection = _connectionFactory.CreateConnection();
             var sql = @"SELECT CheckinID, VeID, SuKienID, NhanVienID, 
                               ThoiGianCheckin, KetQua, GhiChu 
-                       FROM Checkin 
+                       FROM NhatKyCheckIn 
                        WHERE SuKienID = @SuKienId
                        ORDER BY ThoiGianCheckin DESC";
 
@@ -59,7 +59,7 @@ namespace Repositories.Implementations
             using var connection = _connectionFactory.CreateConnection();
             var sql = @"SELECT CheckinID, VeID, SuKienID, NhanVienID, 
                               ThoiGianCheckin, KetQua, GhiChu 
-                       FROM Checkin 
+                       FROM NhatKyCheckIn 
                        WHERE VeID = @VeId
                        ORDER BY ThoiGianCheckin DESC";
 
@@ -69,7 +69,7 @@ namespace Repositories.Implementations
         public async Task<int> CreateAsync(NhatKyCheckIn checkin)
         {
             using var connection = _connectionFactory.CreateConnection();
-            var sql = @"INSERT INTO Checkin (VeID, SuKienID, NhanVienID, 
+            var sql = @"INSERT INTO NhatKyCheckIn (VeID, SuKienID, NhanVienID, 
                                             ThoiGianCheckin, KetQua, GhiChu)
                        VALUES (@VeID, @SuKienID, @NhanVienID, 
                                @ThoiGianCheckin, @KetQua, @GhiChu);
@@ -81,7 +81,7 @@ namespace Repositories.Implementations
         public async Task<bool> UpdateAsync(NhatKyCheckIn checkin)
         {
             using var connection = _connectionFactory.CreateConnection();
-            var sql = @"UPDATE Checkin 
+            var sql = @"UPDATE NhatKyCheckIn 
                        SET VeID = @VeID,
                            SuKienID = @SuKienID,
                            NhanVienID = @NhanVienID,
@@ -98,7 +98,7 @@ namespace Repositories.Implementations
         {
             using var connection = _connectionFactory.CreateConnection();
             var sql = @"SELECT COUNT(*) 
-                       FROM Checkin 
+                       FROM NhatKyCheckIn 
                        WHERE SuKienID = @SuKienId AND KetQua = 1";
 
             return await connection.ExecuteScalarAsync<int>(sql, new { SuKienId = suKienId });
