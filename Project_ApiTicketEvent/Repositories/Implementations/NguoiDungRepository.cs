@@ -120,7 +120,6 @@ namespace Repositories.Implementations
             UPDATE dbo.NguoiDung
             SET HoTen = @HoTen,
                 Email = @Email,
-                MatKhauHash = @MatKhauHash,
                 VaiTroId = @VaiTroId,
                 TrangThai = @TrangThai,
                 TenDangNhap = @TenDangNhap,
@@ -136,7 +135,6 @@ namespace Repositories.Implementations
             AddParam(cmd, "@Id", user.NguoiDungId);
             AddParam(cmd, "@HoTen", user.HoTen);
             AddParam(cmd, "@Email", user.Email);
-            AddParam(cmd, "@MatKhauHash", user.MatKhauHash);
             AddParam(cmd, "@VaiTroId", user.VaiTroId);
             AddParam(cmd, "@TrangThai", user.TrangThai);
             AddParam(cmd, "@TenDangNhap", user.TenDangNhap);
