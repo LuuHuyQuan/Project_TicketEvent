@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Repositories.Interfaces;
+using Services.Interfaces;
 
 namespace TicketEvent.Admin.Controllers
 {
@@ -10,12 +11,26 @@ namespace TicketEvent.Admin.Controllers
     public class DanhMucSuKienController : ControllerBase
     {
         private readonly IDanhMucSuKienRepository _repo;
+        private readonly IDanhMucSuKienService _service;
 
-        public DanhMucSuKienController(IDanhMucSuKienRepository repo)
+        public DanhMucSuKienController(IDanhMucSuKienRepository repo, IDanhMucSuKienService service)
         {
             _repo = repo;
-        }
+            _service = service;
 
+        }
+        [HttpGet("by-name")]
+        public async Task<IActionResult> GetByName([FromQuery] string ten)
+        {
+            if (string.IsNullOrWhiteSpace(ten))
+                return BadRequest(new { message = "Thiếu query parameter: ten" });
+
+            var item = await _service.GetByNameAsync(ten);
+            if (item == null)
+                return NotFound(new { message = "Không tìm thấy danh mục phù hợp." });
+
+            return Ok(item);
+        }
         [HttpGet]
         public IActionResult GetAll()
         {

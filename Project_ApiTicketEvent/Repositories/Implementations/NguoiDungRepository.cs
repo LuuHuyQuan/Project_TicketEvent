@@ -185,5 +185,32 @@ namespace Repositories.Implementations
                 SoDienThoai = r["SoDienThoai"] == DBNull.Value ? null : r["SoDienThoai"]?.ToString()
             };
         }
+
+        public List<NguoiDung> GetByMaVaiTro(string maVaiTro)
+        {
+            const string sql = @"
+            SELECT nd.NguoiDungId, nd.HoTen, nd.Email, nd.MatKhauHash, nd.VaiTroId,
+                   nd.NgayTao, nd.TrangThai, nd.TenDangNhap, nd.SoDienThoai
+            FROM dbo.NguoiDung nd
+            INNER JOIN dbo.VaiTro vt ON vt.VaiTroId = nd.VaiTroId
+            WHERE vt.MaVaiTro = @MaVaiTro
+              AND (nd.TrangThai = 1 OR nd.TrangThai IS NULL)
+            ORDER BY nd.NguoiDungId DESC;";
+
+              var list = new List<NguoiDung>();
+
+         using var conn = _factory.CreateConnection();
+             conn.Open();
+
+    using var cmd = conn.CreateCommand();
+        cmd.CommandText = sql;
+                        AddParam(cmd, "@MaVaiTro", maVaiTro);
+
+                        using var reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                            list.Add(Map(reader));
+
+                        return list;
+        }
     }
 }
