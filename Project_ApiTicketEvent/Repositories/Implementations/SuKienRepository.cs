@@ -188,5 +188,87 @@ namespace Repositories.Implementations
 
             return await connection.QueryAsync<SuKien>(sql, new { Now = DateTime.Now });
         }
+        public List<SuKien> GetPending()
+        {
+                    const string sql = @"
+        SELECT
+            SuKienID, DanhMucID, DiaDiemID, ToChucID,
+            TenSuKien, MoTa, ThoiGianBatDau, ThoiGianKetThuc,
+            AnhBiaUrl, TrangThai, NgayTao
+        FROM dbo.SuKien
+        WHERE TrangThai = 0
+        ORDER BY NgayTao DESC, SuKienID DESC;";
+
+            var list = new List<SuKien>();
+
+            using var conn = _connectionFactory.CreateConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            using var rd = cmd.ExecuteReader();
+            while (rd.Read())
+            {
+                var item = new SuKien
+                {
+                    SuKienID = rd.GetInt32(0),
+                    DanhMucID = rd.GetInt32(1),
+                    DiaDiemID = rd.GetInt32(2),
+                    ToChucID = rd.GetInt32(3),
+
+                    TenSuKien = rd.GetString(4),
+                    MoTa = rd.IsDBNull(5) ? null : rd.GetString(5),
+
+                    ThoiGianBatDau = rd.GetDateTime(6),
+                    ThoiGianKetThuc = rd.GetDateTime(7),
+
+                    AnhBiaUrl = rd.IsDBNull(8) ? null : rd.GetString(8),
+
+                    TrangThai = Convert.ToByte(rd.GetValue(9)),
+                    NgayTao = rd.GetDateTime(10)
+                };
+
+                list.Add(item);
+            }
+
+            return list;
+        }
+
+        public bool Approve(int suKienId)
+        {
+            return UpdateStatusIfPending(suKienId, 1);
+        }
+
+        public bool Cancel(int suKienId)
+        {
+            return UpdateStatusIfPending(suKienId, 5);
+        }
+        private bool UpdateStatusIfPending(int suKienId, byte newStatus)
+        {
+            const string sql = @"
+            UPDATE dbo.SuKien
+            SET TrangThai = @newStatus
+            WHERE SuKienID = @id AND TrangThai = 0;";
+
+            using var conn = _connectionFactory.CreateConnection();
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            var p1 = cmd.CreateParameter();
+            p1.ParameterName = "@newStatus";
+            p1.Value = newStatus;
+            cmd.Parameters.Add(p1);
+
+            var p2 = cmd.CreateParameter();
+            p2.ParameterName = "@id";
+            p2.Value = suKienId;
+            cmd.Parameters.Add(p2);
+
+            var affected = cmd.ExecuteNonQuery();
+            return affected > 0;
+        }
     }
 }
