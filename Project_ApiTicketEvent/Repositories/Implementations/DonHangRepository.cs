@@ -151,7 +151,12 @@ SET TongTien = (
 )
 WHERE DonHangID = @DonHangID;";
 
-            // Dùng SqlTransaction vì bạn đang dùng SqlClient
+            // (MỚI) Lấy SuKienID + DonGia chuẩn từ DB theo LoaiVeID
+            const string sqlGetLoaiVeInfo = @"
+SELECT SuKienID, DonGia
+FROM dbo.LoaiVe
+WHERE LoaiVeID = @LoaiVeID;";
+
             using var raw = _connectionFactory.CreateConnection();
             var conn = (SqlConnection)raw;
             if (conn.State != ConnectionState.Open) await conn.OpenAsync();
@@ -160,23 +165,54 @@ WHERE DonHangID = @DonHangID;";
 
             try
             {
-                int donHangId;
+                // 0) VALIDATE + CHUẨN HÓA ITEMS (fix lệch sự kiện ngay từ gốc)
+                int suKienIdDb = 0;
+                var normalizedItems = new List<(int LoaiVeID, int SoLuong, decimal DonGia)>();
 
-                // 1) tạo DonHang
+                foreach (var it in req.Items)
+                {
+                    if (it.LoaiVeID <= 0) throw new ArgumentException("LoaiVeID invalid");
+                    if (it.SoLuong <= 0) throw new ArgumentException("SoLuong must be > 0");
+
+                    using (var cmdLv = new SqlCommand(sqlGetLoaiVeInfo, conn, tx))
+                    {
+                        cmdLv.Parameters.AddWithValue("@LoaiVeID", it.LoaiVeID);
+
+                        using var r = await cmdLv.ExecuteReaderAsync();
+                        if (!await r.ReadAsync())
+                            throw new ArgumentException($"LoaiVeID={it.LoaiVeID} không tồn tại.");
+
+                        var lvSuKienId = r.GetInt32(r.GetOrdinal("SuKienID"));
+                        var lvDonGia = r.GetDecimal(r.GetOrdinal("DonGia"));
+
+                        // đảm bảo tất cả LoaiVe thuộc cùng 1 sự kiện
+                        if (suKienIdDb == 0) suKienIdDb = lvSuKienId;
+                        else if (suKienIdDb != lvSuKienId)
+                            throw new ArgumentException(
+                                $"Các LoaiVe không cùng 1 sự kiện. " +
+                                $"Đang có SuKienID={suKienIdDb} nhưng LoaiVeID={it.LoaiVeID} thuộc SuKienID={lvSuKienId}.");
+
+                        normalizedItems.Add((it.LoaiVeID, it.SoLuong, lvDonGia));
+                    }
+                }
+
+                // (Tuỳ chọn) Nếu bạn muốn bắt buộc client gửi đúng SuKienID thì check:
+                if (req.SuKienID > 0 && req.SuKienID != suKienIdDb)
+                    throw new ArgumentException($"SuKienID gửi lên ({req.SuKienID}) không khớp DB ({suKienIdDb}).");
+
+                // 1) tạo DonHang (DÙNG suKienIdDb, không tin req.SuKienID nữa)
+                int donHangId;
                 using (var cmd = new SqlCommand(sqlInsertDonHang, conn, tx))
                 {
                     cmd.Parameters.AddWithValue("@NguoiMuaID", req.NguoiMuaID);
-                    cmd.Parameters.AddWithValue("@SuKienID", req.SuKienID);
+                    cmd.Parameters.AddWithValue("@SuKienID", suKienIdDb);
 
                     donHangId = (int)await cmd.ExecuteScalarAsync();
                 }
 
-                // 2) thêm ChiTietDonHang
-                foreach (var it in req.Items)
+                // 2) thêm ChiTietDonHang (DÙNG DonGia từ DB, không tin request)
+                foreach (var it in normalizedItems)
                 {
-                    if (it.SoLuong <= 0) throw new ArgumentException("SoLuong must be > 0");
-                    if (it.DonGia < 0) throw new ArgumentException("DonGia must be >= 0");
-
                     using var cmd = new SqlCommand(sqlInsertItem, conn, tx);
                     cmd.Parameters.AddWithValue("@DonHangID", donHangId);
                     cmd.Parameters.AddWithValue("@LoaiVeID", it.LoaiVeID);
@@ -201,6 +237,7 @@ WHERE DonHangID = @DonHangID;";
                 throw;
             }
         }
+
 
         public async Task<bool> CancelAsync(int donHangId, int nguoiMuaId)
         {

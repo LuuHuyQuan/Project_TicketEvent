@@ -18,7 +18,18 @@ builder.Services.AddScoped<ISuKienRepository, SuKienRepository>();
 builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
 builder.Services.AddScoped<ILoaiVeRepository, LoaiVeRepository>();
 builder.Services.AddScoped<IThanhToanRepository, ThanhToanRepository>();
+builder.Services.AddScoped<IVeRepository, VeRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLiveServer", policy =>
+    {
+        policy
+            .WithOrigins("http://127.0.0.1:5500")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
@@ -31,7 +42,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowLiveServer");
 app.UseAuthorization();
 
 app.MapControllers();

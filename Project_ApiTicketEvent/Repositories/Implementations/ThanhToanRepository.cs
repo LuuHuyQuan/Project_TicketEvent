@@ -37,12 +37,12 @@ namespace Repositories.Implementations
         public async Task<List<ThanhToan>> GetHistoryAsync(int nguoiMuaId)
         {
             const string sql = @"
-SELECT tt.ThanhToanID, tt.DonHangID, tt.MaGiaoDich, tt.PhuongThuc, tt.SoTien,
-       tt.TrangThai, tt.ThoiGianThanhToan, tt.RawResponse
-FROM dbo.ThanhToan tt
-JOIN dbo.DonHang dh ON dh.DonHangID = tt.DonHangID
-WHERE dh.NguoiMuaID = @NguoiMuaID
-ORDER BY ISNULL(tt.ThoiGianThanhToan, '1900-01-01') DESC, tt.ThanhToanID DESC;";
+            SELECT tt.ThanhToanID, tt.DonHangID, tt.MaGiaoDich, tt.PhuongThuc, tt.SoTien,
+                   tt.TrangThai, tt.ThoiGianThanhToan, tt.RawResponse
+            FROM dbo.ThanhToan tt
+            JOIN dbo.DonHang dh ON dh.DonHangID = tt.DonHangID
+            WHERE dh.NguoiMuaID = @NguoiMuaID
+            ORDER BY ISNULL(tt.ThoiGianThanhToan, '1900-01-01') DESC, tt.ThanhToanID DESC;";
 
             var list = new List<ThanhToan>();
 
@@ -74,13 +74,13 @@ ORDER BY ISNULL(tt.ThoiGianThanhToan, '1900-01-01') DESC, tt.ThanhToanID DESC;";
         public async Task<List<ThanhToan>> GetHistoryByDonHangAsync(int nguoiMuaId, int donHangId)
         {
             const string sql = @"
-SELECT tt.ThanhToanID, tt.DonHangID, tt.MaGiaoDich, tt.PhuongThuc, tt.SoTien,
-       tt.TrangThai, tt.ThoiGianThanhToan, tt.RawResponse
-FROM dbo.ThanhToan tt
-JOIN dbo.DonHang dh ON dh.DonHangID = tt.DonHangID
-WHERE dh.NguoiMuaID = @NguoiMuaID
-  AND tt.DonHangID = @DonHangID
-ORDER BY ISNULL(tt.ThoiGianThanhToan, '1900-01-01') DESC, tt.ThanhToanID DESC;";
+            SELECT tt.ThanhToanID, tt.DonHangID, tt.MaGiaoDich, tt.PhuongThuc, tt.SoTien,
+                   tt.TrangThai, tt.ThoiGianThanhToan, tt.RawResponse
+            FROM dbo.ThanhToan tt
+            JOIN dbo.DonHang dh ON dh.DonHangID = tt.DonHangID
+            WHERE dh.NguoiMuaID = @NguoiMuaID
+              AND tt.DonHangID = @DonHangID
+            ORDER BY ISNULL(tt.ThoiGianThanhToan, '1900-01-01') DESC, tt.ThanhToanID DESC;";
 
             var list = new List<ThanhToan>();
 
