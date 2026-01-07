@@ -10,6 +10,6 @@ namespace Repositories.Interfaces
 {
     public interface ICheckInRepository
     {
-        CheckInResponse? Scan(CheckInRequest req, int banToChucId, int? suKienId = null);
+        object Checkin(CheckInRequest req);
     }
 }

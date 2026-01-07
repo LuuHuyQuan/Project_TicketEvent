@@ -19,6 +19,7 @@ builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
 builder.Services.AddScoped<ILoaiVeRepository, LoaiVeRepository>();
 builder.Services.AddScoped<IThanhToanRepository, ThanhToanRepository>();
 builder.Services.AddScoped<IVeRepository, VeRepository>();
+builder.Services.AddScoped<ICheckInRepository, CheckInRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddCors(options =>
 {

@@ -1,6 +1,5 @@
 ﻿using Data;
 using Microsoft.Data.SqlClient;
-using Models.DTOs.Reponses;
 using Models.DTOs.Requests;
 using Repositories.Interfaces;
 using System;
@@ -21,107 +20,158 @@ namespace Repositories.Implementations
             _connectionFactory = connectionFactory;
         }
 
-        public CheckInResponse? Scan(CheckInRequest req, int banToChucId, int? suKienId = null)
+        public object Checkin(CheckInRequest req)
         {
             var qrToken = (req.QrToken ?? "").Trim();
             var maVe = (req.MaVe ?? "").Trim();
 
             if (string.IsNullOrWhiteSpace(qrToken) && string.IsNullOrWhiteSpace(maVe))
-                throw new ArgumentException("Thiếu QrToken hoặc MaVe.");
+                return new { success = false, message = "Thiếu QrToken hoặc MaVe." };
 
-            // Lấy vé theo QrToken (ưu tiên) hoặc MaVe, join đúng như VeRepository đang làm
-            const string sqlFind = @"
+            if (req.NhanVienID <= 0)
+                return new { success = false, message = "nhanVienID không hợp lệ." };
+
+            using var raw = _connectionFactory.CreateConnection();
+            var conn = (SqlConnection)raw;
+            if (conn.State != ConnectionState.Open) conn.Open();
+
+            using var tx = conn.BeginTransaction();
+
+            try
+            {
+                // 1) Tìm vé theo QrToken hoặc MaVe + join để lấy SuKienID + kiểm tra đơn hàng đã thanh toán
+                // Lưu ý: tên cột/bảng có thể khác nhẹ tùy SQL của bạn -> nếu khác thì đổi cho khớp.
+                const string sqlFind = @"
 SELECT TOP 1
-    v.VeID, v.MaVe, v.QrToken, v.TrangThai,
-    v.LoaiVeID,
-    lv.TenLoaiVe,
-    sk.SuKienID, sk.TenSuKien
+    v.VeID, v.MaVe, v.QrToken, v.TrangThai AS VeTrangThai,
+    v.DonHangID, dh.TrangThai AS DonHangTrangThai,
+    lv.LoaiVeID, lv.TenLoaiVe,
+    sk.SuKienID, sk.TenSuKien,
+    sk.ToChucID
 FROM dbo.Ve v
+JOIN dbo.DonHang dh ON dh.DonHangID = v.DonHangID
 JOIN dbo.LoaiVe lv ON lv.LoaiVeID = v.LoaiVeID
 JOIN dbo.SuKien sk ON sk.SuKienID = lv.SuKienID
 WHERE (@QrToken IS NULL OR v.QrToken = @QrToken)
   AND (@MaVe IS NULL OR v.MaVe = @MaVe);";
 
-            using var conn = (SqlConnection)_connectionFactory.CreateConnection();
-            if (conn.State != ConnectionState.Open) conn.Open();
+                int veId, donHangId, suKienId, toChucId;
+                string maVeDb, qrTokenDb, tenLoaiVe, tenSuKien;
+                byte veTrangThai, donHangTrangThai;
 
-            int veId, loaiVeId, suKienIdVe;
-            string maVeDb, qrTokenDb, tenLoaiVe, tenSuKien;
-            byte trangThai;
-
-            using (var cmd = new SqlCommand(sqlFind, conn))
-            {
-                cmd.Parameters.AddWithValue("@QrToken", string.IsNullOrWhiteSpace(qrToken) ? (object)DBNull.Value : qrToken);
-                cmd.Parameters.AddWithValue("@MaVe", string.IsNullOrWhiteSpace(maVe) ? (object)DBNull.Value : maVe);
-
-                using var r = cmd.ExecuteReader();
-                if (!r.Read()) return null;
-
-                veId = r.GetInt32(r.GetOrdinal("VeID"));
-                maVeDb = r.GetString(r.GetOrdinal("MaVe"));
-                qrTokenDb = r.GetString(r.GetOrdinal("QrToken"));
-                trangThai = Convert.ToByte(r["TrangThai"]);
-
-                loaiVeId = r.GetInt32(r.GetOrdinal("LoaiVeID"));
-                tenLoaiVe = r.GetString(r.GetOrdinal("TenLoaiVe"));
-
-                suKienIdVe = r.GetInt32(r.GetOrdinal("SuKienID"));
-                tenSuKien = r.GetString(r.GetOrdinal("TenSuKien"));
-            }
-
-            if (suKienId.HasValue && suKienId.Value > 0 && suKienIdVe != suKienId.Value)
-                throw new InvalidOperationException($"Vé không thuộc sự kiện này (Ve thuộc SuKienID={suKienIdVe}).");
-
-            // Trạng thái vé
-            if (trangThai == 1)
-            {
-                return new CheckInResponse
+                using (var cmd = new SqlCommand(sqlFind, conn, tx))
                 {
-                    VeID = veId,
-                    MaVe = maVeDb,
-                    QrToken = qrTokenDb,
-                    SuKienID = suKienIdVe,
-                    TenSuKien = tenSuKien,
-                    LoaiVeID = loaiVeId,
-                    TenLoaiVe = tenLoaiVe,
-                    TrangThaiTruoc = 1,
-                    TrangThaiSau = 1,
-                    ThoiGianCheckIn = DateTime.Now,
-                    BanToChucID = banToChucId
-                };
-            }
+                    cmd.Parameters.AddWithValue("@QrToken", string.IsNullOrWhiteSpace(qrToken) ? (object)DBNull.Value : qrToken);
+                    cmd.Parameters.AddWithValue("@MaVe", string.IsNullOrWhiteSpace(maVe) ? (object)DBNull.Value : maVe);
 
-            if (trangThai == 2)
-                throw new InvalidOperationException("Vé đã bị hủy/hoàn, không thể check-in.");
+                    using var r = cmd.ExecuteReader();
+                    if (!r.Read())
+                    {
+                        tx.Rollback();
+                        return new { success = false, message = "Không tìm thấy vé theo QrToken/MaVe." };
+                    }
 
-            // Update check-in: 0 -> 1 
-            const string sqlUpdate = @"
+                    veId = r.GetInt32(r.GetOrdinal("VeID"));
+                    donHangId = r.GetInt32(r.GetOrdinal("DonHangID"));
+                    suKienId = r.GetInt32(r.GetOrdinal("SuKienID"));
+                    toChucId = r.GetInt32(r.GetOrdinal("ToChucID"));
+
+                    maVeDb = r.GetString(r.GetOrdinal("MaVe"));
+                    qrTokenDb = r.GetString(r.GetOrdinal("QrToken"));
+                    tenLoaiVe = r.GetString(r.GetOrdinal("TenLoaiVe"));
+                    tenSuKien = r.GetString(r.GetOrdinal("TenSuKien"));
+
+                    veTrangThai = Convert.ToByte(r["VeTrangThai"]);
+                    donHangTrangThai = Convert.ToByte(r["DonHangTrangThai"]);
+                }
+
+                if (req.NhanVienID != toChucId)
+                {
+                    InsertLog(conn, tx, veId, suKienId, req.NhanVienID, false, "Không thuộc quyền ban tổ chức. " + req.GhiChu);
+                    tx.Commit();
+                    return new { success = false, message = "Bạn không có quyền check-in vé của sự kiện này." };
+                }
+
+                // 3) Đơn hàng phải đã thanh toán
+                if (donHangTrangThai != 1)
+                {
+                    InsertLog(conn, tx, veId, suKienId, req.NhanVienID, false, "Đơn hàng chưa thanh toán. " + req.GhiChu);
+                    tx.Commit();
+                    return new { success = false, message = "Đơn hàng chưa thanh toán nên không thể check-in." };
+                }
+
+                // 4) Vé phải ở trạng thái 0 mới được check-in
+                if (veTrangThai != 0)
+                {
+                    InsertLog(conn, tx, veId, suKienId, req.NhanVienID, false, $"Vé không hợp lệ (TrangThai={veTrangThai}). " + req.GhiChu);
+                    tx.Commit();
+                    return new { success = false, message = $"Vé không thể check-in (TrangThai={veTrangThai})." };
+                }
+
+                // 5) Update ve TrangThai: 0 -> 1 (chống quét 2 lần)
+                const string sqlUpdate = @"
 UPDATE dbo.Ve
 SET TrangThai = 1
 WHERE VeID = @VeID AND TrangThai = 0;";
 
-            using (var cmdUp = new SqlCommand(sqlUpdate, conn))
-            {
-                cmdUp.Parameters.AddWithValue("@VeID", veId);
-                var affected = cmdUp.ExecuteNonQuery();
-                if (affected == 0)
-                    throw new InvalidOperationException("Không thể check-in (vé có thể vừa đổi trạng thái).");
-            }
+                int affected;
+                using (var cmdUp = new SqlCommand(sqlUpdate, conn, tx))
+                {
+                    cmdUp.Parameters.AddWithValue("@VeID", veId);
+                    affected = cmdUp.ExecuteNonQuery();
+                }
 
-            return new CheckInResponse
+                if (affected == 0)
+                {
+                    InsertLog(conn, tx, veId, suKienId, req.NhanVienID, false, "Race condition: vé vừa đổi trạng thái. " + req.GhiChu);
+                    tx.Commit();
+                    return new { success = false, message = "Không thể check-in (vé có thể vừa đổi trạng thái)." };
+                }
+
+                // 6) Log thành công
+                InsertLog(conn, tx, veId, suKienId, req.NhanVienID, true, "Check-in thành công. " + req.GhiChu);
+
+                tx.Commit();
+
+                return new
+                {
+                    success = true,
+                    message = "Check-in thành công.",
+                    data = new
+                    {
+                        veId,
+                        maVe = maVeDb,
+                        qrToken = qrTokenDb,
+                        donHangId,
+                        suKienId,
+                        tenSuKien,
+                        tenLoaiVe,
+                        trangThaiTruoc = 0,
+                        trangThaiSau = 1
+                    }
+                };
+            }
+            catch (Exception ex)
             {
-                VeID = veId,
-                MaVe = maVeDb,
-                QrToken = qrTokenDb,
-                SuKienID = suKienIdVe,
-                TenSuKien = tenSuKien,
-                LoaiVeID = loaiVeId,
-                TenLoaiVe = tenLoaiVe,
-                TrangThaiTruoc = 0,
-                TrangThaiSau = 1,
-                ThoiGianCheckIn = DateTime.Now,
-                BanToChucID = banToChucId
-            };
+                tx.Rollback();
+                return new { success = false, message = "Lỗi check-in: " + ex.Message };
+            }
+        }
+
+        private static void InsertLog(SqlConnection conn, SqlTransaction tx, int veId, int suKienId, int nhanVienId, bool ketQua, string? ghiChu)
+        {
+            // Nếu DB bạn khác tên cột, đổi lại cho khớp
+            const string sqlLog = @"
+INSERT INTO dbo.NhatKyCheckin (VeID, SuKienID, NhanVienID, KetQua, GhiChu)
+VALUES (@VeID, @SuKienID, @NhanVienID, @KetQua, @GhiChu);";
+
+            using var cmd = new SqlCommand(sqlLog, conn, tx);
+            cmd.Parameters.AddWithValue("@VeID", veId);
+            cmd.Parameters.AddWithValue("@SuKienID", suKienId);
+            cmd.Parameters.AddWithValue("@NhanVienID", nhanVienId);
+            cmd.Parameters.AddWithValue("@KetQua", ketQua);
+            cmd.Parameters.AddWithValue("@GhiChu", (object?)ghiChu ?? DBNull.Value);
+            cmd.ExecuteNonQuery();
         }
     }
 }

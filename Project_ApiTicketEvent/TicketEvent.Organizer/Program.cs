@@ -12,6 +12,7 @@ builder.Services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
 
 // Đăng ký SuKienRepository
 builder.Services.AddScoped<ISuKienRepository, SuKienRepository>();
+builder.Services.AddScoped<ICheckInRepository, CheckInRepository>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
