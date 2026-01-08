@@ -19,6 +19,16 @@ namespace TicketEvent.Admin.Controllers
             _service = service;
 
         }
+        [HttpGet("{id:int}")]
+        public IActionResult GetById(int id)
+        {
+            var item = _repo.GetById(id);
+            if (item == null)
+                return Ok(new { success = false, message = "Không tìm thấy danh mục" });
+
+            return Ok(new { success = true, data = item });
+        }
+
         [HttpGet("by-name")]
         public async Task<IActionResult> GetByName([FromQuery] string ten)
         {
