@@ -11,5 +11,7 @@ namespace Repositories.Interfaces
     {
         List<VeResponse> GetMyTickets(int nguoiSoHuuId);
         VeResponse? GetMyTicketByMaVe(int nguoiSoHuuId, string maVe);
+        Task<bool> HuyVeAsync(int nguoiSoHuuId, string maVe, string? lyDo);
+        Task<HoanVeResponse> HoanVeAsync(int nguoiSoHuuId, string maVe, string? lyDo, string? phuongThuc, string? rawResponse);
     }
 }

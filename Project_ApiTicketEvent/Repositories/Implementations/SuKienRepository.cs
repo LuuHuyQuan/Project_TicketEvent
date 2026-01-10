@@ -43,7 +43,7 @@ namespace Repositories.Implementations
                 dm.TenDanhMuc,
                 sk.DiaDiemID, dd.TenDiaDiem,
                 sk.ThoiGianBatDau, sk.ThoiGianKetThuc,
-                sk.MoTa, sk.TrangThai
+                sk.MoTa,sk.AnhBiaUrl, sk.TrangThai
             FROM dbo.SuKien sk
             JOIN dbo.DanhMucSuKien dm ON dm.DanhMucID = sk.DanhMucID
             LEFT JOIN dbo.DiaDiem dd ON dd.DiaDiemID = sk.DiaDiemID
@@ -69,7 +69,7 @@ namespace Repositories.Implementations
                 dm.TenDanhMuc,
                 sk.DiaDiemID, dd.TenDiaDiem,
                 sk.ThoiGianBatDau, sk.ThoiGianKetThuc,
-                sk.MoTa, sk.TrangThai
+                sk.MoTa,sk.AnhBiaUrl, sk.TrangThai
             FROM dbo.SuKien sk
             JOIN dbo.DanhMucSuKien dm ON dm.DanhMucID = sk.DanhMucID
             LEFT JOIN dbo.DiaDiem dd ON dd.DiaDiemID = sk.DiaDiemID
@@ -114,6 +114,7 @@ namespace Repositories.Implementations
                     ThoiGianBatDau = reader.IsDBNull(reader.GetOrdinal("ThoiGianBatDau")) ? null : reader.GetDateTime(reader.GetOrdinal("ThoiGianBatDau")),
                     ThoiGianKetThuc = reader.IsDBNull(reader.GetOrdinal("ThoiGianKetThuc")) ? null : reader.GetDateTime(reader.GetOrdinal("ThoiGianKetThuc")),
                     MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? null : reader.GetString(reader.GetOrdinal("MoTa")),
+                    AnhBiaUrl = reader.IsDBNull(reader.GetOrdinal("AnhBiaUrl")) ? null : reader.GetString(reader.GetOrdinal("AnhBiaUrl")),
                     TrangThai = Convert.ToInt32(reader["TrangThai"]) == 1
                 });
             }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Models.DTOs.Requests;
 using Repositories.Interfaces;
 
 namespace TicketEvent.Attendee.Controllers
@@ -15,7 +16,6 @@ namespace TicketEvent.Attendee.Controllers
             _repo = repo;
         }
 
-        // GET /api/Ve/me?nguoiSoHuuId=3
         [HttpGet("me")]
         public IActionResult GetMyTickets([FromQuery] int nguoiSoHuuId)
         {
@@ -26,7 +26,6 @@ namespace TicketEvent.Attendee.Controllers
             return Ok(data);
         }
 
-        // GET /api/Ve/{maVe}?nguoiSoHuuId=3
         [HttpGet("{maVe}")]
         public IActionResult GetMyTicketDetail([FromRoute] string maVe, [FromQuery] int nguoiSoHuuId)
         {
@@ -38,6 +37,39 @@ namespace TicketEvent.Attendee.Controllers
                 return NotFound(new { message = "Không tìm thấy vé hoặc vé không thuộc về bạn." });
 
             return Ok(item);
+        }
+
+        [HttpPatch("huy/{maVe}")]
+        public async Task<IActionResult> HuyVe(
+            [FromRoute] string maVe,
+            [FromQuery] int nguoiSoHuuId,
+            [FromBody] HuyVeRequest? body)
+        {
+            if (nguoiSoHuuId <= 0) return BadRequest(new { message = "nguoiSoHuuId invalid" });
+            if (string.IsNullOrWhiteSpace(maVe)) return BadRequest(new { message = "maVe invalid" });
+
+            var ok = await _repo.HuyVeAsync(nguoiSoHuuId, maVe, body?.LyDo);
+            if (!ok)
+                return BadRequest(new { message = "Không thể hủy (vé không tồn tại/không thuộc về bạn/đã dùng/đã hủy/đã hoàn)." });
+
+            return Ok(new { message = "Đã hủy vé." });
+        }
+
+        [HttpPost("hoan/{maVe}")]
+        public async Task<IActionResult> HoanVe(
+            [FromRoute] string maVe,
+            [FromQuery] int nguoiSoHuuId,
+            [FromBody] HoanVeRequest body)
+        {
+            if (nguoiSoHuuId <= 0) return BadRequest(new { message = "nguoiSoHuuId invalid" });
+            if (string.IsNullOrWhiteSpace(maVe)) return BadRequest(new { message = "maVe invalid" });
+
+            var result = await _repo.HoanVeAsync(nguoiSoHuuId, maVe, body?.LyDo, body?.PhuongThuc, body?.RawResponse);
+
+            if (!result.Success)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(result);
         }
     }
 }

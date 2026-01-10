@@ -19,7 +19,7 @@ namespace Models.DTOs.Requests
 
         public DateTime? ThoiGianBatDau { get; set; }
         public DateTime? ThoiGianKetThuc { get; set; }
-
+        public string? AnhBiaUrl { get; set; }
         public string? MoTa { get; set; }
 
         public bool TrangThai { get; set; }
